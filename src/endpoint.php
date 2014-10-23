@@ -18,14 +18,18 @@ try{
 	$response = $core->ProcessRequest($module, $query);
 	
 	if(!isset($_REQUEST["debug"]))
+		$debug = ob_get_flush();
+	else
 		ob_end_clean();
 		
-	header("Response-code: 200");
 	header("Content-type: application/json");
 	echo $response;
+	
+	if(isset($debug))
+		echo "\n" . $debug;
 }
 catch(NoSuchEndpointException $ex){
-	http_response_code(401);
+	http_response_code(400);
 	echo '{"error":"' . $ex->getMessage() . '"}';
 	exit;
 }
