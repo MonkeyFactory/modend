@@ -19,7 +19,14 @@ class Core {
 	}
 	
 	function ProcessRequest($module, $query){
-		$result = $this->route->Invoke($module, $query);
+		try{
+			$rawInput = file_get_contents("php://input");
+			$input = json_decode($rawInput);
+		}catch(Exception $ex){
+			$input = array();
+		}
+	
+		$result = $this->route->Invoke($module, $query, $input);
 		return json_encode($result);
 	}
 }

@@ -14,3 +14,5 @@ class ModuleVersionMismatchException extends Exception {
 class ModuleNotFoundException extends Exception {}
 
 class ModuleHasNoSetupException extends Exception {}
+
+class InvalidInputData extends Exception {}

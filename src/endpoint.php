@@ -17,10 +17,11 @@ $core->BuildRoutes();
 try{
 	$response = $core->ProcessRequest($module, $query);
 	
-	if(!isset($_REQUEST["debug"]))
-		$debug = ob_get_flush();
-	else
+	if(isset($_REQUEST["debug"])){
+		$debug = ob_get_clean();
+	}else{
 		ob_end_clean();
+	}
 		
 	header("Content-type: application/json");
 	echo $response;
@@ -29,11 +30,14 @@ try{
 		echo "\n" . $debug;
 }
 catch(NoSuchEndpointException $ex){
-	http_response_code(400);
+	http_response_code(501);
 	echo '{"error":"' . $ex->getMessage() . '"}';
 	exit;
 }
-catch(Exception $ex2)
+catch(InvalidInputData $ex2){
+	http_response_code(400);
+}
+catch(Exception $ex3)
 {
 	http_response_code(500);
 	exit;

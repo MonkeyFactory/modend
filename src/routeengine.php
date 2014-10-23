@@ -11,12 +11,13 @@ class RouteEngine {
 		$this->routes[] = array($parent, $path, $function, $method);
 	}
 	
-	function Invoke($module, $query){
+	function Invoke($module, $query, $input){
 		$method = $_SERVER["REQUEST_METHOD"];
 	
 		foreach($this->routes as $route){
 			if(get_class($route[0]) == $module && $route[3] == $method && preg_match($route[1], $query, $matches)){
-				return call_user_func_array($route[2], array_slice($matches, 1));
+				$arguments = array_merge(array($input), array_slice($matches, 1));
+				return call_user_func_array($route[2], $arguments);
 			}
 		}
 		
