@@ -8,5 +8,3 @@ create table modules(
 	moduleName varchar(50) not null,
 	installedVersion double not null
 );
-
-insert into modules (moduleName, installedVersion) values("page", 1.0);

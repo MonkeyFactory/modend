@@ -10,10 +10,15 @@ class Setup extends Installer {
 					  pageContent text not null
 					);');
 				   
+		$this->db->query('insert into pages (pageTitle, pageContent) values("Demo Page", "This is a demo page that was automatically added");');
+		
 		return true;
 	}
 	
 	function Upgrade($oldversion){
+		$this->Uninstall();
+		$this->Install();
+		
 		return true;
 	}
 	

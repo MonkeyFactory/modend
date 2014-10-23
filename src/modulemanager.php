@@ -8,7 +8,14 @@ class ModuleManager {
 	}
 	
 	function GetAvailableModules(){
+		$modules = array();
+		foreach(scandir("modules/") as $f){
+			if($f != "." && $f != ".." && is_dir("modules/$f") && file_exists("modules/$f/module-$f.php")){
+				$modules[] = $f;
+			}
+		}
 		
+		return $modules;
 	}
 	
 	function InstantiateModule($moduleName, $expectedVersion){
@@ -17,11 +24,13 @@ class ModuleManager {
 			throw new ModuleNotFoundException("No file at: $modulePath");
 		}
 			
-		include $modulePath;
-		if($version == $expectedVersion){
-			return array(new $moduleName($db), $version);
+		include_once $modulePath;
+		$module = new $moduleName($this->db);
+		
+		if($module->version == $expectedVersion){
+			return $module;
 		}else{
-			throw new ModuleVersionMismatchException("Module '$moduleName' is at version $version but the database has it at $expectedVersion", $version, $expectedVersion);
+			throw new ModuleVersionMismatchException("Module '$moduleName' is at version {$module->version} but the database has it at $expectedVersion", $module->version, $expectedVersion);
 		}
 	}
 	
@@ -40,22 +49,44 @@ class ModuleManager {
 		if(!file_exists($setupPath))
 			throw new ModuleHasNoSetupException("Module $moduleName has no setup file");
 			
-		include $setupPath;
-		return new Setup($this->db);
+		$modulePath = "modules/$moduleName/module-$moduleName.php";
+		if(!file_exists($modulePath)){
+			throw new ModuleNotFoundException("No file at: $modulePath");
+		}
+			
+		include_once $setupPath;
+		include_once $modulePath;
+		
+		return array(new Setup($this->db), (new $moduleName($this->db))->version);
 	}
 	
 	function InstallModule($moduleName){
 		$setup = $this->GetModuleSetupObject($moduleName);
-		return $setup->Install();
+		if($setup[0]->Install()){
+			$this->db->query("insert into modules (moduleName, installedVersion) values('$moduleName', '{$setup[1]}');");
+			return true;
+		}
+		
+		return false;
 	}
 	
 	function UpgradeModule($moduleName, $oldversion){
 		$setup = $this->GetModuleSetupObject($moduleName);
-		return $setup->Upgrade($oldversion);
+		if($setup[0]->Upgrade($oldversion)){
+			$this->db->query("update modules set installedVersion = '{$setup[1]}' where moduleName = '$moduleName' limit 1;");
+			return true;
+		}
+		
+		return false;
 	}
 	
 	function UninstallModule($moduleName){
 		$setup = $this->GetModuleSetupObject($moduleName);
-		return $setup->Uninstall();
+		if($setup[0]->Uninstall()){
+			$this->db->query("delete from modules where moduleName = '$moduleName' limit 1;");
+			return true;
+		}
+		
+		return false;
 	}
 }
