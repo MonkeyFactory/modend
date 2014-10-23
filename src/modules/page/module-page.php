@@ -14,16 +14,17 @@ class page extends Module {
 
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "addPage"), "POST");
+		$route->register($this, "|^\/$|", array($this, "listPages"));
 		$route->register($this, "|^\/(\d*)$|", array($this, "getPage"));
 	}
 	
 	function addPage($input){
 		if(!isset($input->pageTitle) || $input->pageTitle == ""){
-			throw new InvalidInputDataException("argment pageTitle is required");
+			throw new InvalidInputDataException("Argument pageTitle is required");
 		}
 		
 		if(!isset($input->pageContent) || $input->pageContent == ""){
-			throw new InvalidInputDataException("argment pageContent is required");
+			throw new InvalidInputDataException("Argument pageContent is required");
 		}
 		
 		$sth = $this->db->prepare("insert into pages (pageTitle, pageContent) values(?, ?);");
@@ -33,10 +34,17 @@ class page extends Module {
 		return array("pageTitle" => $input->pageTitle, "pageContent" => $input->pageContent, "pageId" => $this->db->lastInsertId());
 	}
 	
+	function listPages(){
+		$retval = array();
+		
+		foreach($this->db->query("select * from pages", PDO::FETCH_ASSOC) as $row){
+			$retval[] = $row;
+		}
+		
+		return $retval;
+	}
+	
 	function getPage($input, $pageId){
-		//$model = new PageModel($this->db);
-		//$page = $model->GetPageById($pageId);
-
 		$sth = $this->db->prepare("select pageTitle, pageContent from pages where pageId = ?");
 		$sth->execute(array($pageId));
 		
