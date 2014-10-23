@@ -22,18 +22,8 @@ class Core {
 	
 	function BuildRoutes(){
 		foreach($this->moduleManager->GetInstalledModules() as $module){
-			$modulePath = "modules/{$module[0]}/module-{$module[0]}.php";
-			if(!file_exists($modulePath)){
-				throw new ModuleNotFoundException("No file at: $modulePath");
-			}
-			
-			include $modulePath;
-			if($module[1] == $version){
-				$moduleInstance = new $module[0]($db);
-				$moduleInstance->RegisterRoutes($this->route);
-			}else{
-				throw new ModuleVersionMismatchException("Module '{$module[0]}' is at version $version but the database has it at {$module[1]}");
-			}
+			$moduleInstance = $this->moduleManager->InstantiateModule($module[0], $module[1])[0];
+			$moduleInstance->RegisterRoutes($this->route);
 		}
 	}
 	
