@@ -19,11 +19,11 @@ class page extends Module {
 	
 	function addPage($input){
 		if(!isset($input->pageTitle) || $input->pageTitle == ""){
-			throw new InvalidInputData("argment pageTitle is required");
+			throw new InvalidInputDataException("argment pageTitle is required");
 		}
 		
 		if(!isset($input->pageContent) || $input->pageContent == ""){
-			throw new InvalidInputData("argment pageContent is required");
+			throw new InvalidInputDataException("argment pageContent is required");
 		}
 		
 		$sth = $this->db->prepare("insert into pages (pageTitle, pageContent) values(?, ?);");
@@ -40,6 +40,10 @@ class page extends Module {
 		$sth = $this->db->prepare("select pageTitle, pageContent from pages where pageId = ?");
 		$sth->execute(array($pageId));
 		
-		return $sth->fetch(PDO::FETCH_ASSOC);
+		$page = $sth->fetch(PDO::FETCH_ASSOC);
+		if(!$page)
+			throw new NoSuchResourceException();
+		else 
+			return $page;
 	}
 } 

@@ -15,4 +15,6 @@ class ModuleNotFoundException extends Exception {}
 
 class ModuleHasNoSetupException extends Exception {}
 
-class InvalidInputData extends Exception {}
+class InvalidInputDataException extends Exception {}
+
+class NoSuchResourceException extends Exception {}

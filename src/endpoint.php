@@ -34,10 +34,13 @@ catch(NoSuchEndpointException $ex){
 	echo '{"error":"' . $ex->getMessage() . '"}';
 	exit;
 }
-catch(InvalidInputData $ex2){
+catch(InvalidInputDataException $ex2){
 	http_response_code(400);
 }
-catch(Exception $ex3)
+catch(NoSuchResourceException $ex3) {
+	http_response_code(404);
+}
+catch(Exception $ex4)
 {
 	http_response_code(500);
 	exit;
