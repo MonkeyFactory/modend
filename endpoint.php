@@ -17,13 +17,16 @@ $core->BuildRoutes();
 try{
 	$response = $core->ProcessRequest($module, $query);
 	
-	//ob_end_clean();
+	if(!isset($_REQUEST["debug"]))
+		ob_end_clean();
+		
 	header("Response-code: 200");
 	header("Content-type: application/json");
 	echo $response;
 }
 catch(NoSuchEndpointException $ex){
 	http_response_code(401);
+	echo '{"error":"' . $ex->getMessage() . '"}';
 	exit;
 }
 catch(Exception $ex2)
