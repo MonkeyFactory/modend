@@ -16,9 +16,12 @@ class page extends Module {
 	}
 	
 	function getPage($pageId){
-		$model = new PageModel();
-		$page = $model->GetPageById($pageId);
+		//$model = new PageModel($this->db);
+		//$page = $model->GetPageById($pageId);
 		
-		return $page;
+		$sth = $this->db->prepare("select pageTitle, pageContent from pages where pageId = ?");
+		$sth->execute(array($pageId));
+		
+		return $sth->fetch(PDO::FETCH_ASSOC);
 	}
 } 

@@ -73,8 +73,7 @@ class ModuleManager {
 	function UpgradeModule($moduleName, $oldversion){
 		$setup = $this->GetModuleSetupObject($moduleName);
 		if($setup[0]->Upgrade($oldversion)){
-			$this->db->query("update modules set installedVersion = '{$setup[1]}' where moduleName = '$moduleName' limit 1;");
-			return true;
+			return $this->db->exec("update modules set installedVersion = '{$setup[1]}' where moduleName = '$moduleName' limit 1;") > 0;
 		}
 		
 		return false;
@@ -83,8 +82,7 @@ class ModuleManager {
 	function UninstallModule($moduleName){
 		$setup = $this->GetModuleSetupObject($moduleName);
 		if($setup[0]->Uninstall()){
-			$this->db->query("delete from modules where moduleName = '$moduleName' limit 1;");
-			return true;
+			return $this->db->exec("delete from modules where moduleName = '$moduleName' limit 1;") > 0;
 		}
 		
 		return false;
