@@ -3,11 +3,16 @@
 include "routeengine.php";
 include "modulemanager.php";
 include "db.php";
+include "authmanager.php";
+include_once "config.php";
 
 class Core {
 	function __construct(){
+		global $authprovidername;
+	
 		$this->db = GetDatabaseConnection();
-		$this->moduleManager = new ModuleManager($this->db);
+		$this->auth = new AuthManager($authprovidername);
+		$this->moduleManager = new ModuleManager($this->db, $this->auth);
 		$this->route = new RouteEngine();
 	}
 	

@@ -3,8 +3,9 @@
 include_once "exceptions.php";
 
 class ModuleManager {
-	function __construct($db){
+	function __construct($db, $auth){
 		$this->db = $db;
+		$this->auth = $auth;
 	}
 	
 	function GetAvailableModules(){
@@ -25,7 +26,7 @@ class ModuleManager {
 		}
 			
 		include_once $modulePath;
-		$module = new $moduleName($this->db);
+		$module = new $moduleName($this->db, $this->auth);
 		
 		if($module->version == $expectedVersion){
 			return $module;

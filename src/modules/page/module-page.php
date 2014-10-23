@@ -5,9 +5,7 @@ include "pagemodel.php";
 include_once "exceptions.php";
 
 class page extends Module {
-	function __construct($db){
-		parent::__construct($db);
-		
+	function SetMetadata(){
 		$this->version = 1.1;
 		$this->author = "nojan";
 	}
@@ -19,6 +17,8 @@ class page extends Module {
 	}
 	
 	function addPage($input){
+		AuthLevelOr403($this, MODERATOR);
+	
 		if(!isset($input->pageTitle) || $input->pageTitle == ""){
 			throw new InvalidInputDataException("Argument pageTitle is required");
 		}
