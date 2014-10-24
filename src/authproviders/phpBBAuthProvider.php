@@ -34,15 +34,23 @@ class phpBBAuthProvider extends AuthProvider {
 		if($this->user->data['user_id'] == ANONYMOUS)
 			return array();
 	
-		$idToName = array(2 => "Registered users", 4 => "Global moderators", 5 => "Administrators");
+		$idToName = array(1 => "Guests", 2 => "Registered users", 3 => "COPPA User", 4 => "Global moderators", 5 => "Administrators", 6 => "Bots", 7 => "Newly Registered User");
 		$groups = group_memberships(false, $this->user->data['user_id'], false);
 		
 		$retval = array();
 		foreach($groups as $group){
-			$retval[] = array("groupId" => $group["group_id"], "groupname" => array_key_exists($group["group_id"], $idToName) ? $idToName[$group["group_id"]] : "Unknown");
+			$retval[] = array("groupId" => $group["group_id"], "groupName" => array_key_exists($group["group_id"], $idToName) ? $idToName[$group["group_id"]] : "Unknown");
 		}
 		
 		return $retval;
+	}
+	
+	function HasGroup($groups, $groupname){
+		foreach($groups as $group){
+			if($group["groupName"] == $groupname)
+				return true;
+		}
+		return false;
 	}
 	
 	function GetAuthLevel() {
@@ -51,7 +59,11 @@ class phpBBAuthProvider extends AuthProvider {
 		
 		$groups = $this->GetGroups();
 		
-		
-		return ADMIN;
+		if($this->HasGroup($groups, "Administrators"))
+			return ADMIN;
+		elseif ($this->HasGroup($groups, "Global moderators"))
+			return MODERATOR;
+		else
+			return AUTHENTICATED_USER;
 	}
 }

@@ -44,6 +44,11 @@ class AuthManager {
 	
 	function AuthByGroupMembership($groupName){
 		$groups = $this->provider.GetGroups();
-		return in_array($groupName, $groups);
+		
+		foreach($groups as $group){
+			if($group["groupName"] == $groupName)
+				return true;
+		}
+		return false;
 	}
 }
