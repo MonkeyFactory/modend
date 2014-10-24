@@ -38,6 +38,10 @@ class AuthManager {
 		return $this->provider->GetAuthLevel();
 	}
 	
+	function GetGroups(){
+		return $this->provider->GetGroups();
+	}
+	
 	function AuthByGroupMembership($groupName){
 		$groups = $this->provider.GetGroups();
 		return in_array($groupName, $groups);

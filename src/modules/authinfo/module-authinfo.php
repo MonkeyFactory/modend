@@ -13,6 +13,6 @@ class authinfo extends Module {
 	}
 	
 	function getInfo(){
-		return array("user" => $this->auth->GetUser(), "authlevel" => $this->auth->GetAuthLevel());
+		return array("user" => $this->auth->GetUser(), "authlevel" => $this->auth->GetAuthLevel(), "groups" => $this->auth->GetGroups());
 	}
 } 

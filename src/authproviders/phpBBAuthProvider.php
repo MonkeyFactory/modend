@@ -34,15 +34,23 @@ class phpBBAuthProvider extends AuthProvider {
 		if($this->user->data['user_id'] == ANONYMOUS)
 			return array();
 	
+		$idToName = array(2 => "Registered users", 4 => "Global moderators", 5 => "Administrators");
 		$groups = group_memberships(false, $this->user->data['user_id'], false);
-		echo $groups;
 		
+		$retval = array();
+		foreach($groups as $group){
+			$retval[] = array("groupId" => $group["group_id"], "groupname" => array_key_exists($group["group_id"], $idToName) ? $idToName[$group["group_id"]] : "Unknown");
+		}
+		
+		return $retval;
 	}
 	
 	function GetAuthLevel() {
 		if($this->user->data['user_id'] == ANONYMOUS)
 			return NOT_LOGGED_IN;
-	
+		
+		$groups = $this->GetGroups();
+		
 		
 		return ADMIN;
 	}
