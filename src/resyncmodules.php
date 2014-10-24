@@ -16,7 +16,7 @@ function ModuleInDatabase($moduleName, $installed){
 }
 
 $db = GetDatabaseConnection();
-$moduleManager = new ModuleManager($db);
+$moduleManager = new ModuleManager($db, null);
 
 $installed = $moduleManager->GetInstalledModules();
 

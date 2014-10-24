@@ -1,6 +1,6 @@
 <?php
 
-include "base/module.php";
+include_once "base/module.php";
 include "pagemodel.php";
 include_once "exceptions.php";
 

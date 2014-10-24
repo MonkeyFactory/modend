@@ -1,6 +1,6 @@
 <?php
 
-include "base/installer.php";
+include_once "base/installer.php";
 
 class Setup extends Installer {
 	function Install(){
