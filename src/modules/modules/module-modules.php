@@ -27,18 +27,40 @@ class modules extends Module {
 	}
 	
 	function installModule($input, $moduleName){
-		return true;
+		AuthLevelOr403($this, ADMIN);
+	
+		$moduleManager = new ModuleManager($this->db, $this->auth);
+		if(!$moduleManager->InstallModule($moduleName)){
+			throw new Exception("Failed to install module $moduleName");
+		}
+		
+		return array("result"=> "success");
 	}
 	
 	function upgradeModule($input, $moduleName){
-		return true;
+		AuthLevelOr403($this, ADMIN);
+	
+		$moduleManager = new ModuleManager($this->db, $this->auth);
+		if(!$moduleManager->UpgradeModule($moduleName)){
+			throw new Exception("Failed to upgrade module $moduleName");
+		}
+		
+		return array("result"=> "success");
 	}
 	
 	function uninstallModule($input, $moduleName){
-		return true;
+		AuthLevelOr403($this, ADMIN);
+	
+		$moduleManager = new ModuleManager($this->db, $this->auth);
+		if(!$moduleManager->UninstallModule($moduleName)){
+			throw new Exception("Failed to uninstall module $moduleName");
+		}
+		
+		return array("result"=> "success");
 	}
 	
 	function getModules(){
+		AuthLevelOr403($this, MODERATOR);
 		$moduleManager = new ModuleManager($this->db, $this->auth);
 		
 		$allModules = $moduleManager->GetAvailableModules();

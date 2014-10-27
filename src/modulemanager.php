@@ -71,8 +71,17 @@ class ModuleManager {
 		return false;
 	}
 	
-	function UpgradeModule($moduleName, $oldversion){
+	function UpgradeModule($moduleName){
 		$setup = $this->GetModuleSetupObject($moduleName);
+		
+		$statement = $this->db->prepare("select installedVersion from modules where moduleName = ? limit 1");
+		$statement->execute(array($moduleName));
+		$oldversion = $statement->fetchColumn();
+		
+		if($oldversion == $setup[1]){
+			return false;
+		}
+		
 		if($setup[0]->Upgrade($oldversion)){
 			return $this->db->exec("update modules set installedVersion = '{$setup[1]}' where moduleName = '$moduleName' limit 1;") > 0;
 		}

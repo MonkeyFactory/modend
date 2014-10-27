@@ -40,7 +40,7 @@ foreach($moduleManager->GetAvailableModules() as $module){
 		catch(ModuleVersionMismatchException $ex){
 			echo "... Version mismatch detected, upgrading <br />";
 			
-			if($moduleManager->UpgradeModule($module, $ex->expectedVersion)){
+			if($moduleManager->UpgradeModule($module)){
 				echo "...... Module was upgrade! <br />";
 			}else{
 				echo "...... Module upgrade failed! <br />";
