@@ -11,11 +11,11 @@ abstract class Module {
 			$this->SetMetadata();
 		}
 		
-		function SetMetadata(){
+		function Init(){
 		
 		}
 		
-		function RegisterRoutes($route){
-				
-		}
+		abstract function SetMetadata();
+		
+		abstract function RegisterRoutes($route);
 }

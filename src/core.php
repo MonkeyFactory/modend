@@ -19,6 +19,7 @@ class Core {
 	function BuildRoutes(){
 		foreach($this->moduleManager->GetInstalledModules() as $module){
 			$moduleInstance = $this->moduleManager->InstantiateModule($module[0], $module[1]);
+			$moduleInstance->Init();
 			$moduleInstance->RegisterRoutes($this->route);
 		}
 	}
