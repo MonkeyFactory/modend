@@ -1,37 +1,36 @@
 <?php
 
 include_once "base/module.php";
-include "pagemodel.php";
 include_once "exceptions.php";
 
 class page extends Module {
 	function SetMetadata(){
-		$this->version = 1.1;
+		$this->version = 1.0;
 		$this->author = "nojan";
 	}
 
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "addPage"), "POST");
 		$route->register($this, "|^\/$|", array($this, "listPages"));
-		$route->register($this, "|^\/(\d*)$|", array($this, "getPage"));
+		$route->register($this, "|^\/(.*?)$|", array($this, "getPage"));
 	}
 	
 	function addPage($input){
 		AuthLevelOr403($this, MODERATOR);
 	
-		if(!isset($input->pageTitle) || $input->pageTitle == ""){
-			throw new InvalidInputDataException("Argument pageTitle is required");
+		if(!isset($input->pageName) || $input->pageName == ""){
+			throw new InvalidInputDataException("Argument pageName is required");
 		}
 		
 		if(!isset($input->pageContent) || $input->pageContent == ""){
 			throw new InvalidInputDataException("Argument pageContent is required");
 		}
 		
-		$sth = $this->db->prepare("insert into pages (pageTitle, pageContent) values(?, ?);");
-		if($sth->execute(array($input->pageTitle, $input->pageContent)) == 0)
+		$sth = $this->db->prepare("insert into pages (pageName, pageContent) values(?, ?);");
+		if($sth->execute(array($input->pageName, $input->pageContent)) == 0)
 			throw new Exception("Database insert failed when adding page");
 
-		return array("pageTitle" => $input->pageTitle, "pageContent" => $input->pageContent, "pageId" => $this->db->lastInsertId());
+		return array("pageName" => $input->pageName, "pageContent" => $input->pageContent, "pageId" => $this->db->lastInsertId());
 	}
 	
 	function listPages(){
@@ -44,9 +43,9 @@ class page extends Module {
 		return $retval;
 	}
 	
-	function getPage($input, $pageId){
-		$sth = $this->db->prepare("select pageTitle, pageContent from pages where pageId = ?");
-		$sth->execute(array($pageId));
+	function getPage($input, $pageName){
+		$sth = $this->db->prepare("select pageContent from pages where pageName = ?");
+		$sth->execute(array($pageName));
 		
 		$page = $sth->fetch(PDO::FETCH_ASSOC);
 		if(!$page)
