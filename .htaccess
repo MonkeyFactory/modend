@@ -1,2 +1,3 @@
 RewriteEngine on
 RewriteRule ^api/(\w*)/(.*?)$ src/endpoint.php?m=$1&q=/$2&debug
+RewriteRule ^api/(\w*)$ src/endpoint.php?m=$1&q=/&debug

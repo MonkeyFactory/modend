@@ -12,7 +12,22 @@ class page extends Module {
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "addPage"), "POST");
 		$route->register($this, "|^\/$|", array($this, "listPages"));
+		$route->register($this, "|^\/(.*?)$|", array($this, "updatePage"), "POST");
 		$route->register($this, "|^\/(.*?)$|", array($this, "getPage"));
+	}
+	
+	function updatePage($input, $pageName){
+		AuthLevelOr403($this, MODERATOR);
+		
+		if(!isset($input->pageContent) || $input->pageContent == ""){
+			throw new InvalidInputDataException("Argument pageContent is required");
+		}
+		
+		$sth = $this->db->prepare("update pages set pageContent = ? where pageName = ? limit 1;");
+		if($sth->execute(array($input->pageContent, $input->pageName)) == 0)
+			throw new Exception("Database update failed when updating page");
+
+		return array("pageName" => $input->pageName, "pageContent" => $input->pageContent);
 	}
 	
 	function addPage($input){
@@ -44,7 +59,7 @@ class page extends Module {
 	}
 	
 	function getPage($input, $pageName){
-		$sth = $this->db->prepare("select pageContent from pages where pageName = ?");
+		$sth = $this->db->prepare("select pageName, pageContent from pages where pageName = ?");
 		$sth->execute(array($pageName));
 		
 		$page = $sth->fetch(PDO::FETCH_ASSOC);
