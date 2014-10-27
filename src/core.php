@@ -8,10 +8,8 @@ include_once "config.php";
 
 class Core {
 	function __construct(){
-		global $authprovidername;
-	
 		$this->db = GetDatabaseConnection();
-		$this->auth = new AuthManager($authprovidername);
+		$this->auth = new AuthManager(AUTHPROVIDERNAME);
 		$this->moduleManager = new ModuleManager($this->db, $this->auth);
 		$this->route = new RouteEngine();
 	}

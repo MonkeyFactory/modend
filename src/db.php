@@ -3,11 +3,9 @@
 include "config.php";
 
 function GetDatabaseConnection(){
-	global $dbhost, $dbname, $dbuser, $dbpass;
-
 	try{
-		$dsn = "mysql:dbname=$dbname;host=$dbhost";
-		return new PDO($dsn, $dbuser, $dbpass);
+		$dsn = DBPROVIDER . ":dbname=" . DBNAME . ";host=" . DBHOST;
+		return new PDO($dsn, DBUSER, DBPASS);
 	}catch(PDOException $ex){
 		http_response_code(500);
 		die("Check database connection: " . $ex->getMessage());

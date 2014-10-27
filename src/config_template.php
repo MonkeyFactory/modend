@@ -1,8 +1,9 @@
 <?php
 
-$dbhost = "";
-$dbname = "";
-$dbuser = "";
-$dbpass = "";
+define("DBPROVIDER", "mysql");
+define("DBHOST", "");
+define("DBNAME", "");
+define("DBUSER", "");
+define("DBPASS", "");
 
-$authprovidername = "phpBBAuthProvider";
+define("AUTHPROVIDERNAME", "phpBBAuthProvider");
