@@ -2,7 +2,7 @@
 
 include_once "base/installer.php";
 
-class Setup extends Installer {
+class setup_authinfo extends Installer {
 	function Install(){
 		return true;
 	}

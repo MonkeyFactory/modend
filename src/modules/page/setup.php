@@ -2,7 +2,7 @@
 
 include_once "base/installer.php";
 
-class Setup extends Installer {
+class setup_page extends Installer {
 	function Install(){
 		$this->db->query('create table pages(
 					  pageName varchar(50) primary key,
