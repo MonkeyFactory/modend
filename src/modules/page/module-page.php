@@ -52,6 +52,7 @@ class page extends Module {
 		$retval = array();
 		
 		foreach($this->db->query("select * from pages", PDO::FETCH_ASSOC) as $row){
+			$row["pageContent"] = $this->processLinkage($row["pageContent"]);
 			$retval[] = $row;
 		}
 		
@@ -63,9 +64,44 @@ class page extends Module {
 		$sth->execute(array($pageName));
 		
 		$page = $sth->fetch(PDO::FETCH_ASSOC);
-		if(!$page)
+		if(!$page){
 			throw new NoSuchResourceException();
-		else 
+		}else{
+			$page["pageContent"] = $this->processLinkage($page["pageContent"]);
 			return $page;
+		} 
+	}
+	
+	function processLinkage($data){
+		$pattern = "|(\[(?P<opening>\w*)\](?P<content>.*?)\[/(?P<closing>\w*)\])|";
+		preg_match_all($pattern, $data, $matches);
+		
+		for($i = 0; $i < count($matches["opening"]); $i++){
+			if($matches["opening"][$i] == $matches["closing"][$i]){
+				switch($matches["opening"][$i]){
+					case "page":
+						try{
+							$newContent = $this->getPage(null, $matches["content"][$i])["pageContent"];
+						}catch(NoSuchResourceException $ex){
+							$newContent = "Error no page called " . $matches["content"][$i];
+						}
+						break;
+					case "template":
+						if(file_exists($matches["content"][$i])){
+							$newContent = file_get_contents($matches["content"][$i]);
+						}else{
+							$newContent = "Error no template file at: " . $matches["content"][$i];
+						}
+						break;
+					default:
+						$newContent = "";
+				}
+				
+				$newContent = $this->processLinkage($newContent);
+				$data = str_replace($matches[0][$i], $newContent, $data);
+			}
+		}
+		
+		return $data;
 	}
 } 
