@@ -58,7 +58,9 @@ class ModuleManager {
 		include_once $setupPath;
 		include_once $modulePath;
 		
-		return array(new Setup($this->db), (new $moduleName($this->db, null))->version);
+		$setupObjectName = "setup_" . $moduleName;
+		
+		return array(new $setupObjectName($this->db), (new $moduleName($this->db, null))->version);
 	}
 	
 	function InstallModule($moduleName){
