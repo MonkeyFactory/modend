@@ -13,6 +13,7 @@ class page extends Module {
 		$route->register($this, "|^\/$|", array($this, "addPage"), "POST");
 		$route->register($this, "|^\/$|", array($this, "listPages"));
 		$route->register($this, "|^\/(.*?)$|", array($this, "updatePage"), "POST");
+		$route->register($this, "|^\/(.*?)$|", array($this, "deletePage"), "DELETE");
 		$route->register($this, "|^\/(.*?)$|", array($this, "getPage"));
 	}
 	
@@ -28,6 +29,20 @@ class page extends Module {
 			throw new Exception("Database update failed when updating page");
 
 		return array("pageName" => $input->pageName, "pageContent" => $input->pageContent);
+	}
+	
+	function deletePage($input, $pageName){
+		AuthLevelOr403($this, MODERATOR);
+		
+		if(!isset($pageName) || $pageName == ""){
+			throw new InvalidInputDataException("Argument pageName is required");
+		}
+		
+		$sth = $this->db->prepare("delete from pages where pageName = ? limit 1;");
+		if($sth->execute(array($pageName)) == 0)
+			throw new Exception("Database update failed when deleting page");
+
+		return true;
 	}
 	
 	function addPage($input){
