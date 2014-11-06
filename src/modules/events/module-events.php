@@ -17,9 +17,36 @@ class events extends Module {
 		$route->register($this, "|^\/(\d*)$|", array($this, "getEvent"));
 	}
 	
+	function validateInputForEvent($input){
+		if(!isset($input->Title) || $input->Title == "")
+			throw new InvalidInputDataException("Field Title is required");
+			
+		if(!isset($input->Description) || $input->Description == "")
+			throw new InvalidInputDataException("Field Description is required");
+			
+		if(!isset($input->Location) || $input->Location == "")
+			throw new InvalidInputDataException("Field Location is required");
+			
+		if(!isset($input->StartDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->StartDate) === false)
+			throw new InvalidInputDataException("Field StartDate is required and has to be YYYY-MM-DD HH:MM");
+			
+		if(!isset($input->EndDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->EndDate) === false)
+			throw new InvalidInputDataException("Field EndDate is required and has to be YYYY-MM-DD HH:MM");
+	}
+	
 	function updateEvent($input, $eventId){
 		AuthLevelOr403($this, MODERATOR);
 		
+		if(!isset($eventId) || $eventId == "")
+			throw new InvalidInputDataException("Argument eventId is required");
+		
+		$this->validateInputForEvent($input);
+			
+		$sth = $this->db->prepare("update events set Title=?, Description=?, Location=?, StartDate=?, EndDate=? where eventId=? limit 1");
+		if($sth->execute(array($input->Title, $input->Description, $input->Location, $input->StartDate, $input->EndDate, $eventId)) == 0)
+			throw new Exception("Database update failed when updating event");
+			
+		return $this->getEvent(null, $eventId);
 	}
 	
 	function deleteEvent($input, $eventId){
@@ -37,8 +64,16 @@ class events extends Module {
 	
 	function addEvent($input){
 		AuthLevelOr403($this, MODERATOR);
-	
 		
+		$this->validateInputForEvent($input);
+		
+		//Should add support for smart stuff like repeating events here...
+		
+		$sth = $this->db->prepare("insert into events values(0,?,?,?,?,?)");
+		if($sth->execute(array($input->Title, $input->Location, $input->StartDate, $input->EndDate, $input->Description)) == 0)
+			throw new Exception("Database update failed when adding event");
+			
+		return array("eventId" => $this->db->lastInsertId(),"Title" => $input->Title, "Location" => $input->Location, "Description" => $input->Description, "StartDate" => $input->StartDate, "EndDate" => $input->EndDate);
 	}
 	
 	function listEvents(){
