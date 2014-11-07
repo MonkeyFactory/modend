@@ -23,6 +23,7 @@ try{
 		ob_end_clean();
 	}
 		
+	header("Access-Control-Allow-Origin: " . CORS_HEADER);
 	header("Content-type: application/json");
 	echo $response;
 	
