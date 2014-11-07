@@ -10,6 +10,12 @@ class authinfo extends Module {
 
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "getInfo"));
+		$route->register($this, "|^/provoke/(\d)*$|", array($this, "provoke"));
+	}
+	
+	function provoke($input, $authlevel){
+		AuthLevelOr403($this, $authlevel);
+		return true;	
 	}
 	
 	function getInfo(){
