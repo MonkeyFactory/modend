@@ -30,6 +30,13 @@ class phpBBAuthProvider extends AuthProvider {
 		return $this->user->data['username_clean'];
 	}
 	
+	function GetUserId() {
+		if($this->user->data['user_id'] == ANONYMOUS)
+			return null;
+	
+		return $this->user->data['user_id'];
+	}
+	
 	function GetGroups() {
 		if($this->user->data['user_id'] == ANONYMOUS)
 			return array();
