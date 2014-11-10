@@ -11,7 +11,9 @@ class setup_gallery extends Installer {
 													  Owner int not null
 													  );");
 													  
-		$this->db->exec("create table imagelinking (GalleryId int not null, ImageId int not null);");
+		$this->db->exec("create table imagelinking (LinkId int auto_increment primary key, 
+													GalleryId int not null, 
+													ImageId int not null);");
 		
 		$this->db->exec("create table images (ImageId int auto_increment primary key,
 											  Filename varchar(50) not null,
