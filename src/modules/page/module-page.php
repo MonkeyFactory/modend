@@ -67,7 +67,9 @@ class page extends Module {
 		$retval = array();
 		
 		foreach($this->db->query("select * from pages", PDO::FETCH_ASSOC) as $row){
-			$row["pageContent"] = $this->processLinkage($row["pageContent"]);
+			if(!isset($_GET["nolinking"])){
+				$row["pageContent"] = $this->processLinkage($row["pageContent"]);
+			}
 			$retval[] = $row;
 		}
 		
@@ -82,7 +84,10 @@ class page extends Module {
 		if(!$page){
 			throw new NoSuchResourceException();
 		}else{
-			$page["pageContent"] = $this->processLinkage($page["pageContent"]);
+			if(!isset($_GET["nolinking"])){
+				$page["pageContent"] = $this->processLinkage($page["pageContent"]);
+			}
+			
 			return $page;
 		} 
 	}
