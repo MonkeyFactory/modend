@@ -35,6 +35,10 @@ class AuthManager {
 		return $this->provider->GetUser();
 	}
 	
+	function GetUserId(){
+		return $this->provider->GetUserId();
+	}
+	
 	function IsLoggedIn(){
 		return $this->GetAuthLevel() > NOT_LOGGED_IN;
 	}
