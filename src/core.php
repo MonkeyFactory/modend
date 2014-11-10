@@ -16,9 +16,16 @@ class Core {
 	
 	function BuildRoutes(){
 		foreach($this->moduleManager->GetInstalledModules() as $module){
-			$moduleInstance = $this->moduleManager->InstantiateModule($module[0], $module[1]);
-			$moduleInstance->Init();
-			$moduleInstance->RegisterRoutes($this->route);
+			try{
+				$moduleInstance = $this->moduleManager->InstantiateModule($module[0], $module[1]);
+				$moduleInstance->Init();
+				$moduleInstance->RegisterRoutes($this->route);
+			}catch(ModuleVersionMismatchException $ex){
+				//Version missmatch detected, do not include the module
+				if(isset($_REQUEST["debug"])){
+					echo "Notice: " . $ex->GetMessage() . ". Not instantiating!";
+				}
+			}
 		}
 	}
 	
