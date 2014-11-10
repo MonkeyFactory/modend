@@ -83,8 +83,8 @@ class modules extends Module {
 				}
 			}
 			catch(ModuleVersionMismatchException $ex){
-					$moduleItem["dbVersion"] = $ex->currentVersion;
-					$moduleItem["fsVersion"] = $ex->expectedVersion;
+					$moduleItem["dbVersion"] = $ex->expectedVersion;
+					$moduleItem["fsVersion"] = $ex->moduleVersion;
 			}
 			
 			$retVal[] = $moduleItem;
