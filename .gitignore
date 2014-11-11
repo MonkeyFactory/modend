@@ -49,4 +49,6 @@ Temporary Items
 config.php
 config.js
 config.sh
-src/imagegallery/test.jpg
+
+#Image Gallery
+src/imagegallery
