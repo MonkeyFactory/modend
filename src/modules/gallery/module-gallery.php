@@ -83,7 +83,6 @@ class gallery extends Module {
 	
 	function uploadImage($input){
 		AuthLevelOr403($this, MODERATOR);
-	
 	}
 	
 	function removeImage($input, $imageId){

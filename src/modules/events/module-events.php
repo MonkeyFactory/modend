@@ -32,6 +32,9 @@ class events extends Module {
 			
 		if(!isset($input->EndDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->EndDate) === false)
 			throw new InvalidInputDataException("Field EndDate is required and has to be YYYY-MM-DD HH:MM");
+			
+		if(!isset($input->AllDayEvent))
+			throw new InvalidInputDataException("Field AllDayEvent is required and has to be boolean");
 	}
 	
 	function updateEvent($input, $eventId){
@@ -42,8 +45,8 @@ class events extends Module {
 		
 		$this->validateInputForEvent($input);
 			
-		$sth = $this->db->prepare("update events set Title=?, Description=?, Location=?, StartDate=?, EndDate=? where eventId=? limit 1");
-		if($sth->execute(array($input->Title, $input->Description, $input->Location, $input->StartDate, $input->EndDate, $eventId)) == 0)
+		$sth = $this->db->prepare("update events set Title=?, Description=?, Location=?, StartDate=?, EndDate=?, AllDayEvent=? where eventId=? limit 1");
+		if($sth->execute(array($input->Title, $input->Description, $input->Location, $input->StartDate, $input->EndDate, $input->AllDayEvent, $eventId)) == 0)
 			throw new Exception("Database update failed when updating event");
 			
 		return $this->getEvent(null, $eventId);
@@ -69,11 +72,11 @@ class events extends Module {
 		
 		//Should add support for smart stuff like repeating events here...
 		
-		$sth = $this->db->prepare("insert into events values(0,?,?,?,?,?)");
-		if($sth->execute(array($input->Title, $input->Location, $input->StartDate, $input->EndDate, $input->Description)) == 0)
+		$sth = $this->db->prepare("insert into events values(0,?,?,?,?,?,?)");
+		if($sth->execute(array($input->Title, $input->Location, $input->StartDate, $input->EndDate, $input->AllDayEvent, $input->Description)) == 0)
 			throw new Exception("Database update failed when adding event");
 			
-		return array("eventId" => $this->db->lastInsertId(),"Title" => $input->Title, "Location" => $input->Location, "Description" => $input->Description, "StartDate" => $input->StartDate, "EndDate" => $input->EndDate);
+		return array("eventId" => $this->db->lastInsertId(),"Title" => $input->Title, "Location" => $input->Location, "Description" => $input->Description, "StartDate" => $input->StartDate, "AllDayEvent" => $input->AllDayEvent, "EndDate" => $input->EndDate);
 	}
 	
 	function listEvents(){

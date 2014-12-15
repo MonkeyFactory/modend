@@ -10,10 +10,11 @@ class setup_events extends Installer {
 							Location varchar(50) not null,
 							StartDate datetime not null,
 							EndDate datetime not null,
+							AllDayEvent bool not null default 0,
 							Description text
 						);");
 		
-		$this->db->exec("insert into events values (0, 'Test Event', 'Some place more familiar', now(), date_add(now(), interval 2 hour), 'Test event automagically added by the setup script');");
+		$this->db->exec("insert into events values (0, 'Test Event', 'Some place more familiar', now(), date_add(now(), interval 2 hour), false, 'Test event automagically added by the setup script');");
 		
 		return true;
 	}
