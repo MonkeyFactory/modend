@@ -30,11 +30,15 @@ class events extends Module {
 		if(!isset($input->StartDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->StartDate) === false)
 			throw new InvalidInputDataException("Field StartDate is required and has to be YYYY-MM-DD HH:MM");
 			
-		if(!isset($input->EndDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->EndDate) === false)
-			throw new InvalidInputDataException("Field EndDate is required and has to be YYYY-MM-DD HH:MM");
-			
-		if(!isset($input->AllDayEvent))
-			throw new InvalidInputDataException("Field AllDayEvent is required and has to be boolean");
+		if(!isset($input->EndDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->EndDate) === false){
+			if(!isset($input->AllDayEvent)){
+				throw new InvalidInputDataException("Field EndDate is required and has to be YYYY-MM-DD HH:MM. Or field AllDayEvent is required and has to be boolean");
+			}else{
+				$input->EndDate = null;
+			}
+		}else{
+			$input->AllDayEvent = false;
+		}		
 	}
 	
 	function updateEvent($input, $eventId){

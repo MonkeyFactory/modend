@@ -9,7 +9,7 @@ class setup_events extends Installer {
 							Title varchar(50) not null,
 							Location varchar(50) not null,
 							StartDate datetime not null,
-							EndDate datetime not null,
+							EndDate datetime null,
 							AllDayEvent bool not null default 0,
 							Description text
 						);");
