@@ -4,7 +4,7 @@ include "base/authProvider.php";
 include_once "authmanager.php";
 
 define('IN_PHPBB', true);
-define('PHPBB_ROOT_PATH', '../../phpBB3/');
+define('PHPBB_ROOT_PATH', '../../kib-web/pageroot/forum/');
 
 class phpBBAuthProvider extends AuthProvider {
 	function __construct(){
