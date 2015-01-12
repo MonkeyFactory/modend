@@ -16,6 +16,7 @@ class setup_league extends Installer {
 		
 		$this->db->query('create table leagues_matches(
 					matchId int auto_increment primary key
+					leagueId int not null,
 					MatchDate datetime not null;
 					Player1 int not null,
 					Player2 int not null,

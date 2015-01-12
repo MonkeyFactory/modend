@@ -109,7 +109,7 @@ class league extends Module {
 		if(!isset($input->Winner) || $input->Winner == "" || $input->Winner > 2 || $input->Winner < 0)
 			throw new InvalidInputDataException("Argument Winner is required, must be int and between 0 and 2");
 			
-		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?);");
+		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?);");
 		if(!$sth->execute(array($leagueId, $input->MatchDate, $input->Player1, $input->Player2, $input->Winner)))
 			throw new Exception("Error when inserting match into db");
 			
@@ -117,8 +117,60 @@ class league extends Module {
 	}
 	
 	function getLeaderboard($input, $leagueId){
+		if(!isset($leagueId) || $leagueId == "")
+			throw new InvalidInputDataException("Argument leagueId is required");
+			
+		$players = array();
+			
+		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ?");
+		$sth->execute(array($leagueId));
+		foreach($sth->fetchAll() as $row){
+			if(!$players.has_key($row["Player1"]))
+				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0);
 		
+			if(!$players.has_key($row["Player2"]))
+				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0);
+		
+			switch($row["Winner"]){
+				case 0:
+					//draw
+					$players[$row["Player1"]]["draws"]++;
+					$players[$row["Player2"]]["draws"]++;
+				break;
+				case 1:
+					//Player1 wins
+					$players[$row["Player1"]]["wins"]++;
+				break;
+				case 2:
+					//Player2 wins
+					$players[$row["Player2"]]["wins"]++;
+				break;
+				default:
+					//Should not get here!
+			}
+		}
+		
+		$retval = array();
+		foreach($players as $player){
+			$score = $player["wins"] * 20 + $player["draws"] * 10;
+			
+			$retval[] = array("Name" => "?",
+							  "Wins" => $player["wins"],
+							  "Draws" => $player["draws"],
+							  "Score" => $score);
+		}
+		
+		usort($retval, function ($a, $b){
+			if ($a["Score"] == $b["Score"]) {
+				return 0;
+			}
+			return ($a["Score"] < $b["Score"]) ? -1 : 1;
+		});
+		
+		return $retval;
 	}
+	
+	
 	
 	function getScoreHistory($input, $leagueId){
 		
