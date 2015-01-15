@@ -12,7 +12,7 @@ class setup_league extends Installer {
 					  EndDate datetime null
 					);');
 				   
-		$this->db->query('insert into leagues values(null, "Demo League", "This is a demo league that was automatically added", now(), null));');
+		$this->db->query('insert into leagues  (Name, Description, StartDate) values("Demo League", "This is a demo league that was automatically added", now());');
 		
 		$this->db->query('create table leagues_matches(
 					matchId int auto_increment primary key
