@@ -12,13 +12,14 @@ class league extends Module {
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "addLeague"), "POST");
 		$route->register($this, "|^\/$|", array($this, "listLeagues"));
+		
+		$route->register($this, "|^\/(\d*)\/reportmatch$|", array($this, "reportMatch"), "POST");
+		$route->register($this, "|^\/(\d*)\/leaderboard$|", array($this, "getLeaderboard"));
+		$route->register($this, "|^\/(\d*)\/scorehistory$|", array($this, "getScoreHistory"));
+		
 		$route->register($this, "|^\/(.*?)$|", array($this, "updateLeague"), "POST");
 		$route->register($this, "|^\/(.*?)$|", array($this, "deleteLeague"), "DELETE");
 		$route->register($this, "|^\/(.*?)$|", array($this, "getLeague"));
-		
-		$route->register($this, "|^\/(.*?)\/reportmatch$|", array($this, "reportMatch"), "POST");
-		$route->register($this, "|^\/(.*?)\/leaderboard$|", array($this, "getLeaderboard"));
-		$route->register($this, "|^\/(.*?)\/scorehistory$|", array($this, "getScoreHistory"));
 	}
 	
 	/* LEAGUE MANAGMENT */
