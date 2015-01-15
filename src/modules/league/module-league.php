@@ -126,10 +126,10 @@ class league extends Module {
 		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ?");
 		$sth->execute(array($leagueId));
 		foreach($sth->fetchAll() as $row){
-			if(!$players.has_key($row["Player1"]))
+			if(!array_key_exists($row["Player1"], $players))
 				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0);
 		
-			if(!$players.has_key($row["Player2"]))
+			if(!array_key_exists($row["Player1"], $players))
 				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0);
 		
 			switch($row["Winner"]){
