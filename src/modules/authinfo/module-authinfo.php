@@ -33,8 +33,7 @@ class authinfo extends Module {
 			$dsn = "mysql:dbname=" . $dbname . ";host=" . $dbhost;
 			return new PDO($dsn, $dbuser, $dbpasswd);
 		}catch(PDOException $ex){
-			http_response_code(500);
-			die("Unable to connect to PhpBB database: " . $ex->getMessage());
+			throw new Exception("Unable to connect to PhpBB database: " . $ex->getMessage());
 		}
 	}
 	
