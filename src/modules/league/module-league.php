@@ -87,7 +87,7 @@ class league extends Module {
 		if($sth->execute(array($leagueId)) == 0)
 			throw new Exception("Failed to retrieve league from database");
 			
-		return $sth->fetch();
+		return $sth->fetch(PDO::FETCH_ASSOC);
 	}
 	
 	/* SCORE MANAGMENT */
@@ -125,7 +125,7 @@ class league extends Module {
 			
 		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ?");
 		$sth->execute(array($leagueId));
-		foreach($sth->fetchAll() as $row){
+		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
 			if(!array_key_exists($row["Player1"], $players))
 				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0);
 		

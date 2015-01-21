@@ -47,7 +47,7 @@ class authinfo extends Module {
 		if($sth->execute(array($userId)) == 0)
 			throw new Exception("Failed to retrieve phpbb user from database");
 			
-		return $sth->fetch();
+		return $sth->fetch(PDO::FETCH_ASSOC);
 	}
 	
 	function completeUsername($input, $username){
@@ -62,6 +62,6 @@ class authinfo extends Module {
 		if($sth->execute(array($username."%")) == 0)
 			throw new Exception("Failed to retrieve phpbb users from database");
 			
-		return $sth->fetchAll();
+		return $sth->fetchAll(PDO::FETCH_ASSOC);
 	}
 } 
