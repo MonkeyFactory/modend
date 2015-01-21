@@ -11,7 +11,7 @@ class authinfo extends Module {
 	function RegisterRoutes($route){
 		$route->register($this, "|^\/$|", array($this, "getInfo"));
 		$route->register($this, "|^/provoke/(\d)*$|", array($this, "provoke"));
-		$route->register($this, "|^/userid/(\d)*$|", array($this, "lookupUserId"));
+		$route->register($this, "|^/userid/(\d*)$|", array($this, "lookupUserId"));
 		$route->register($this, "|^/completeusername/(.*?)$|", array($this, "completeUsername"));
 	}
 	
