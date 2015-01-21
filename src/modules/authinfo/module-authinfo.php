@@ -2,8 +2,6 @@
 
 include_once "base/module.php";
 
-require_once PHPBB_ROOT_PATH . "/config.php";
-
 class authinfo extends Module {
 	function SetMetadata(){
 		$this->version = 1.0;
@@ -27,7 +25,7 @@ class authinfo extends Module {
 	}
 	
 	function PHPBBConnect(){
-		global $dbname, $dbhost, $dbuser, $dbpasswd;
+		include PHPBB_ROOT_PATH . "config.php";
 		
 		try{
 			$dsn = "mysql:dbname=" . $dbname . ";host=" . $dbhost;
@@ -38,7 +36,7 @@ class authinfo extends Module {
 	}
 	
 	function lookupUserId($input, $userId){
-		global $table_prefix;
+		include PHPBB_ROOT_PATH . "config.php";
 	
 		if(!isset($userId) || $userId == "")
 			throw new InvalidInputDataException("Argument userId is required");
@@ -53,14 +51,14 @@ class authinfo extends Module {
 	}
 	
 	function completeUsername($input, $username){
-		global $table_prefix;
+		include PHPBB_ROOT_PATH . "config.php";
 	
 		if(!isset($username) || $username == "")
 			throw new InvalidInputDataException("Argument username is required");
 			
 		$pdb = $this->PHPBBConnect();
 		
-		$sth = $pdb->prepare("select user_id, username from " . $table_prefix . "users where username like '?%' limit 1");
+		$sth = $pdb->prepare("select user_id, username from " . $table_prefix . "users where username like '?%'");
 		if($sth->execute(array($username)) == 0)
 			throw new Exception("Failed to retrieve phpbb users from database");
 			
