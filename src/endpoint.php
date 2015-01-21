@@ -36,6 +36,10 @@ catch(NoSuchEndpointException $ex){
 	exit;
 }
 catch(InvalidInputDataException $ex2){
+	if(isset($_REQUEST["debug"])){
+		echo "<br />" . get_class($ex4) . ": " . $ex4->getMessage() . "<br />"; 
+	}
+
 	http_response_code(400);
 }
 catch(NoSuchResourceException $ex3) {
