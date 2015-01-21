@@ -58,8 +58,8 @@ class authinfo extends Module {
 			
 		$pdb = $this->PHPBBConnect();
 		
-		$sth = $pdb->prepare("select user_id, username from " . $table_prefix . "users where username like '?%'");
-		if($sth->execute(array($username)) == 0)
+		$sth = $pdb->prepare("select user_id, username from " . $table_prefix . "users where username like ?");
+		if($sth->execute(array($username."%")) == 0)
 			throw new Exception("Failed to retrieve phpbb users from database");
 			
 		return $sth->fetchAll();
