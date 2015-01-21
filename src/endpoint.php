@@ -43,8 +43,10 @@ catch(NoSuchResourceException $ex3) {
 }
 catch(Exception $ex4)
 {
-	if(isset($_REQUEST["debug"]))
-		echo get_class($ex4) . ": " . $ex4->getMessage() . "<br />"; 
+	if(isset($_REQUEST["debug"])){
+		ob_end_flush();
+		echo "<br />" . get_class($ex4) . ": " . $ex4->getMessage() . "<br />"; 
+	}
 		
 	http_response_code(500);
 	exit;
