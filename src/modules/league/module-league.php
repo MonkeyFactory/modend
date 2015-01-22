@@ -158,7 +158,7 @@ class league extends Module {
 		foreach($players as $player){
 			$score = $player["wins"] * 20 + $player["draws"] * 10;
 			
-			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
+			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"]),
 							  "Wins" => $player["wins"],
 							  "Draws" => $player["draws"],
 							  "Score" => $score);
