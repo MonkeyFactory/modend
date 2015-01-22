@@ -247,7 +247,7 @@ class league extends Module {
 		array_unshift($dates, count($dates));	
 		$retval = array($dates);
 		
-		usort($scoreHistory, function ($a, $b){
+		uasort($scoreHistory, function ($a, $b){
 			$k1 = $a[count($a)-1];
 			$k2 = $b[count($b)-1];
 		
