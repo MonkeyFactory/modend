@@ -121,16 +121,19 @@ class league extends Module {
 		if(!isset($leagueId) || $leagueId == "")
 			throw new InvalidInputDataException("Argument leagueId is required");
 			
+		include "modules/authinfo/module-authinfo.php";
+		$authModule = new authinfo($this->db, $this->auth);
+			
 		$players = array();
 			
 		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ?");
 		$sth->execute(array($leagueId));
 		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
 			if(!array_key_exists($row["Player1"], $players))
-				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0);
+				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player1"]);
 		
 			if(!array_key_exists($row["Player1"], $players))
-				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0);
+				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player2"]);
 		
 			switch($row["Winner"]){
 				case 0:
@@ -155,7 +158,7 @@ class league extends Module {
 		foreach($players as $player){
 			$score = $player["wins"] * 20 + $player["draws"] * 10;
 			
-			$retval[] = array("Name" => "?",
+			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
 							  "Wins" => $player["wins"],
 							  "Draws" => $player["draws"],
 							  "Score" => $score);
