@@ -177,6 +177,90 @@ class league extends Module {
 	
 	
 	function getScoreHistory($input, $leagueId){
+		if(!isset($leagueId) || $leagueId == "")
+			throw new InvalidInputDataException("Argument leagueId is required");
+			
+		require_once "modules/authinfo/module-authinfo.php";
+		$authModule = new authinfo($this->db, $this->auth);
+			
+		$dates = array();
+		$scoreHistory = array();
+		$lastDate = null;
+		$currentLevel = 0;
+			
+		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ? order by MatchDate asc");
+		$sth->execute(array($leagueId));
+		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
+			$currentDate = date('d/m -y', strtotime($row["MatchDate"]));
 		
+			if($lastDate != $currentDate){
+				//New date
+				if($lastDate != null){
+					//Players that didn't get any scores for this date should have their old score added again
+					foreach($scoreHistory as $player){
+						$lastIndexScored = count($player) - 1;
+						for($i = $lastIndexScored; $i < $currentLevel;$i++){
+							$player[] = $player[$lastIndexScored];
+						}
+					}
+				}
+				
+				$dates[] = $currentDate;
+				$lastDate = $currentDate;
+				$currentLevel = count($dates) - 1;
+			}
+			
+			//If the player didn't exist before add him and fill his scores with 0 up to current level
+			if(!array_key_exists($row["Player1"], $scoreHistory)){
+				$scoreHistory[$row["Player1"]] = array();
+				
+				for($i = 0; $i < $currentLevel;$i++){
+					$scoreHistory[$row["Player1"]][] = 0;
+				}
+			}
+		
+			if(!array_key_exists($row["Player2"], $scoreHistory)){
+				$scoreHistory[$row["Player2"]] = array();
+				
+				for($i = 0; $i < $currentLevel;$i++){
+					$scoreHistory[$row["Player2"]][] = 0;
+				}
+			}
+			
+			switch($row["Winner"]){
+				case 0:
+					//draw
+					$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 10);
+					$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 10);
+				break;
+				case 1:
+					//Player1 wins
+					$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 20);
+				break;
+				case 2:
+					//Player2 wins
+					$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 20);
+				break;
+				default:
+					//Should not get here!
+			}
+		}
+		
+		array_unshift($dates,null);
+		$retval = array($dates);
+		foreach($scoreHistory as $playerId => $player){
+			array_unshift($player, $authModule->lookupUserId("", $playerId)["username"]);
+			$retval[] = $player;
+		}
+		
+		return $retval;
+	}
+	
+	function incrementScore($player, $currentLevel, $score) {
+		if($currentLevel == count($player) - 1){
+			$player[$currentLevel] += $score;
+		}else{
+			$player[] = $score;
+		}
 	}
 } 
