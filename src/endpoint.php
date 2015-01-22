@@ -31,13 +31,18 @@ try{
 		echo "\n" . $debug;
 }
 catch(NoSuchEndpointException $ex){
+	if(isset($_REQUEST["debug"])){
+		ob_end_flush();
+		echo "<br />" . get_class($ex) . ": " . $ex->getMessage() . "<br />"; 
+	}
+
 	http_response_code(501);
-	echo '{"error":"' . $ex->getMessage() . '"}';
 	exit;
 }
 catch(InvalidInputDataException $ex2){
 	if(isset($_REQUEST["debug"])){
-		echo "<br />" . get_class($ex4) . ": " . $ex4->getMessage() . "<br />"; 
+		ob_end_flush();
+		echo "<br />" . get_class($ex2) . ": " . $ex2->getMessage() . "<br />"; 
 	}
 
 	http_response_code(400);
