@@ -197,12 +197,7 @@ class league extends Module {
 				//New date
 				if($lastDate != null){
 					//Players that didn't get any scores for this date should have their old score added again
-					foreach($scoreHistory as &$player){
-						$lastIndexScored = count($player) - 1;
-						for($i = $lastIndexScored; $i < $currentLevel;$i++){
-							$player[] = $player[$lastIndexScored];
-						}
-					}
+					$this->padScore($scoreHistory, $currentLevel);
 				}
 				
 				$dates[] = $currentDate;
@@ -245,16 +240,11 @@ class league extends Module {
 					//Should not get here!
 			}
 		}
-		
-		foreach($scoreHistory as &$player){
-			$lastIndexScored = count($player) - 1;
-			for($i = $lastIndexScored; $i < $currentLevel;$i++){
-				$player[] = $player[$lastIndexScored];
-			}
-		}
+
+		$this->padScore($scoreHistory, $currentLevel);
 		
 		array_unshift($dates, "");
-		array_unshift($dates, count($dates) + 1);	
+		array_unshift($dates, count($dates));	
 		$retval = array($dates);
 		
 		usort($scoreHistory, function ($a, $b){
@@ -274,6 +264,19 @@ class league extends Module {
 		}
 		
 		return $retval;
+	}
+	
+	function padScore(&$playerScores, $currentLevel){
+		foreach($playerScores as &$player){
+			$lastIndexScored = count($player) - 1;
+			if($lastIndexScored == -1){
+				$player[] = 0;
+			}else{
+				for($i = $lastIndexScored; $i < $currentLevel;$i++){
+					$player[] = $player[$lastIndexScored];
+				}
+			}
+		}
 	}
 	
 	function incrementScore(&$player, $currentLevel, $score) {
