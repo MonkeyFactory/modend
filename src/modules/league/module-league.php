@@ -121,7 +121,7 @@ class league extends Module {
 		if(!isset($leagueId) || $leagueId == "")
 			throw new InvalidInputDataException("Argument leagueId is required");
 			
-		include "modules/authinfo/module-authinfo.php";
+		require_once "modules/authinfo/module-authinfo.php";
 		$authModule = new authinfo($this->db, $this->auth);
 			
 		$players = array();
@@ -132,7 +132,7 @@ class league extends Module {
 			if(!array_key_exists($row["Player1"], $players))
 				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player1"]);
 		
-			if(!array_key_exists($row["Player1"], $players))
+			if(!array_key_exists($row["Player2"], $players))
 				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player2"]);
 		
 			switch($row["Winner"]){
@@ -158,7 +158,7 @@ class league extends Module {
 		foreach($players as $player){
 			$score = $player["wins"] * 20 + $player["draws"] * 10;
 			
-			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"]),
+			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
 							  "Wins" => $player["wins"],
 							  "Draws" => $player["draws"],
 							  "Score" => $score);
@@ -168,7 +168,7 @@ class league extends Module {
 			if ($a["Score"] == $b["Score"]) {
 				return 0;
 			}
-			return ($a["Score"] < $b["Score"]) ? -1 : 1;
+			return ($a["Score"] > $b["Score"]) ? -1 : 1;
 		});
 		
 		return $retval;
