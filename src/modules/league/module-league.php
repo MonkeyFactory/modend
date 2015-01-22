@@ -197,7 +197,7 @@ class league extends Module {
 				//New date
 				if($lastDate != null){
 					//Players that didn't get any scores for this date should have their old score added again
-					foreach($scoreHistory as $player){
+					foreach($scoreHistory as &$player){
 						$lastIndexScored = count($player) - 1;
 						for($i = $lastIndexScored; $i < $currentLevel;$i++){
 							$player[] = $player[$lastIndexScored];
@@ -246,9 +246,29 @@ class league extends Module {
 			}
 		}
 		
-		array_unshift($dates,null);
+		foreach($scoreHistory as &$player){
+			$lastIndexScored = count($player) - 1;
+			for($i = $lastIndexScored; $i < $currentLevel;$i++){
+				$player[] = $player[$lastIndexScored];
+			}
+		}
+		
+		array_unshift($dates, "");
+		array_unshift($dates, count($dates) + 1);	
 		$retval = array($dates);
+		
+		usort($scoreHistory, function ($a, $b){
+			$k1 = $a[count($a)-1];
+			$k2 = $b[count($b)-1];
+		
+			if ($k1 == $k2) {
+				return 0;
+			}
+			return ($k1 > $k2) ? -1 : 1;
+		});
+		
 		foreach($scoreHistory as $playerId => $player){
+			array_unshift($player, 0);
 			array_unshift($player, $authModule->lookupUserId("", $playerId)["username"]);
 			$retval[] = $player;
 		}
@@ -256,11 +276,17 @@ class league extends Module {
 		return $retval;
 	}
 	
-	function incrementScore($player, $currentLevel, $score) {
+	function incrementScore(&$player, $currentLevel, $score) {
 		if($currentLevel == count($player) - 1){
 			$player[$currentLevel] += $score;
 		}else{
-			$player[] = $score;
+			if($currentLevel == 0){
+				$previousScore = 0;
+			}else{
+				$previousScore = $player[$currentLevel - 1];
+			}
+			
+			$player[] = $previousScore + $score;
 		}
 	}
 } 
