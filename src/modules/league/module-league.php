@@ -110,6 +110,21 @@ class league extends Module {
 		if(!isset($input->Winner) || $input->Winner == "" || $input->Winner > 2 || $input->Winner < 0)
 			throw new InvalidInputDataException("Argument Winner is required, must be int and between 0 and 2");
 			
+		//Check if league is active!
+		$league = $this->getLeague(0, $leagueId);		
+		$choosenDate = new DateTime($input->MatchDate);
+		$starts = new DateTime($league->StartDate);
+		if($league->EndDate != null){
+			$ends = new DateTime($league->EndDate);
+			$ends->modify("+1 day");
+		}else{
+			$ends = null;
+		}
+			
+		if($choosenDate < $starts || $choosenDate > $ends){
+			throw new Exception("This league is not active, score report not possible");	
+		}
+			
 		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?);");
 		if(!$sth->execute(array($leagueId, $input->MatchDate, $input->Player1, $input->Player2, $input->Winner)))
 			throw new Exception("Error when inserting match into db");
@@ -130,37 +145,57 @@ class league extends Module {
 		$sth->execute(array($leagueId));
 		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
 			if(!array_key_exists($row["Player1"], $players))
-				$players[$row["Player1"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player1"]);
+				$players[$row["Player1"]] = array("totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player1"]);
 		
 			if(!array_key_exists($row["Player2"], $players))
-				$players[$row["Player2"]] = array("wins" => 0, "draws" => 0, "playerId" => $row["Player2"]);
+				$players[$row["Player2"]] = array("totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player2"]);
 		
 			switch($row["Winner"]){
 				case 0:
 					//draw
-					$players[$row["Player1"]]["draws"]++;
-					$players[$row["Player2"]]["draws"]++;
+					$players[$row["Player1"]]["totDraws"]++;
+					$players[$row["Player2"]]["totDraws"]++;
+					
+					if($players[$row["Player1"]]["lastPlayerFaced"] != $row["Player2"]){
+						$players[$row["Player1"]]["scoredDraws"]++;
+						$players[$row["Player2"]]["scoredDraws"]++;
+					}
 				break;
 				case 1:
 					//Player1 wins
-					$players[$row["Player1"]]["wins"]++;
+					$players[$row["Player1"]]["totWins"]++;
+					$players[$row["Player2"]]["totLoss"]++;
+					
+					if($players[$row["Player1"]]["lastPlayerFaced"] != $row["Player2"]){
+						$players[$row["Player1"]]["scoredWins"]++;
+						$players[$row["Player2"]]["scoredLoss"]++;
+					}
 				break;
 				case 2:
 					//Player2 wins
-					$players[$row["Player2"]]["wins"]++;
+					$players[$row["Player2"]]["totWins"]++;
+					$players[$row["Player1"]]["totLoss"]++;
+					
+					if($players[$row["Player2"]]["lastPlayerFaced"] != $row["Player1"]){
+						$players[$row["Player2"]]["scoredWins"]++;
+						$players[$row["Player1"]]["scoredLoss"]++;
+					}
 				break;
 				default:
 					//Should not get here!
 			}
+			
+			$players[$row["Player1"]]["lastPlayerFaced"] = $row["Player2"];
+			$players[$row["Player2"]]["lastPlayerFaced"] = $row["Player1"];
 		}
 		
 		$retval = array();
 		foreach($players as $player){
-			$score = $player["wins"] * 20 + $player["draws"] * 10;
+			$score = $player["scoredWins"] * 3 + $player["scoredDraws"] * 2 + $player["scoredLoss"];
 			
 			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
-							  "Wins" => $player["wins"],
-							  "Draws" => $player["draws"],
+							  "Wins" => $player["totWins"],
+							  "Draws" => $player["totDraws"],
 							  "Score" => $score);
 		}
 		
@@ -187,6 +222,7 @@ class league extends Module {
 		$scoreHistory = array();
 		$lastDate = null;
 		$currentLevel = 0;
+		$lastOpponents = array();
 			
 		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ? order by MatchDate asc");
 		$sth->execute(array($leagueId));
@@ -212,6 +248,8 @@ class league extends Module {
 				for($i = 0; $i < $currentLevel;$i++){
 					$scoreHistory[$row["Player1"]][] = 0;
 				}
+				
+				$lastOpponents[$row["Player1"]] = -1;
 			}
 		
 			if(!array_key_exists($row["Player2"], $scoreHistory)){
@@ -220,25 +258,38 @@ class league extends Module {
 				for($i = 0; $i < $currentLevel;$i++){
 					$scoreHistory[$row["Player2"]][] = 0;
 				}
+				
+				$lastOpponents[$row["Player2"]] = -1;
 			}
 			
 			switch($row["Winner"]){
 				case 0:
 					//draw
-					$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 10);
-					$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 10);
+					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
+						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 2);
+						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 2);
+					}
 				break;
 				case 1:
 					//Player1 wins
-					$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 20);
+					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
+						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 3);
+						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 1);
+					}
 				break;
 				case 2:
 					//Player2 wins
-					$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 20);
+					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
+						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 3);
+						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 1);
+					}
 				break;
 				default:
 					//Should not get here!
 			}
+			
+			$lastOpponents[$row["Player1"]] = $row["Player2"];
+			$lastOpponents[$row["Player2"]] = $row["Player1"];
 		}
 
 		$this->padScore($scoreHistory, $currentLevel);
