@@ -41,7 +41,7 @@ class league extends Module {
 		$this->validateInputForLeague($input);
 		
 		$sth = $this->db->prepare("insert into league values(null, ?, ?, ?, ?))");
-		if($sth->execute(array($input->Name, $input->Description, $input->StartDate, $input->EndDate)) == 0)
+		if($sth->execute(array($input->Name, $input->Description, $input->StartDate, $input->EndDate ? $input->EndDate : null)) == 0)
 			throw new Exception("Database update failed when creating league");
 			
 		return $this->getLeague($this->db->lastInsertId());
