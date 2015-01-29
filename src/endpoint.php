@@ -4,6 +4,7 @@ ob_start();
 include "core.php";
 
 header("Access-Control-Allow-Origin: " . CORS_HEADER);
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
 if($_SERVER["REQUEST_METHOD"] == "OPTIONS"){
 	http_response_code(200);
