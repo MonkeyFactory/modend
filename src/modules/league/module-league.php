@@ -141,7 +141,7 @@ class league extends Module {
 			
 		$players = array();
 			
-		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ?");
+		$sth = $this->db->prepare("select * from leagues_matches where leagueId = ? order by MatchDate");
 		$sth->execute(array($leagueId));
 		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
 			if(!array_key_exists($row["Player1"], $players))
