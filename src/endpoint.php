@@ -3,6 +3,13 @@ ob_start();
 
 include "core.php";
 
+header("Access-Control-Allow-Origin: " . CORS_HEADER);
+
+if($_SERVER["REQUEST_METHOD"] == "OPTIONS"){
+	http_response_code(200);
+	exit
+}
+
 if(!isset($_GET["m"])){
 	http_response_code(400);
 	exit;
@@ -23,7 +30,6 @@ try{
 		ob_end_clean();
 	}
 		
-	header("Access-Control-Allow-Origin: " . CORS_HEADER);
 	header("Content-type: application/json");
 	echo $response;
 	
