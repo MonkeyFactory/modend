@@ -113,7 +113,7 @@ class league extends Module {
 		//Check if league is active!
 		$league = $this->getLeague(0, $leagueId);		
 		$choosenDate = new DateTime($input->MatchDate);
-		$starts = new DateTime($league->StartDate);
+		$starts = new DateTime($league["StartDate"]);
 		if($league->EndDate != null){
 			$ends = new DateTime($league->EndDate);
 			$ends->modify("+1 day");
@@ -121,7 +121,7 @@ class league extends Module {
 			$ends = null;
 		}
 			
-		if($choosenDate < $starts || $choosenDate > $ends){
+		if($choosenDate < $starts || ($ends != null && $choosenDate > $ends)){
 			throw new Exception("This league is not active, score report not possible");	
 		}
 			
@@ -158,8 +158,12 @@ class league extends Module {
 					
 					if($players[$row["Player1"]]["lastPlayerFaced"] != $row["Player2"]){
 						$players[$row["Player1"]]["scoredDraws"]++;
+					}
+					
+					if($players[$row["Player2"]]["lastPlayerFaced"] != $row["Player1"]){
 						$players[$row["Player2"]]["scoredDraws"]++;
 					}
+					
 				break;
 				case 1:
 					//Player1 wins
@@ -168,8 +172,12 @@ class league extends Module {
 					
 					if($players[$row["Player1"]]["lastPlayerFaced"] != $row["Player2"]){
 						$players[$row["Player1"]]["scoredWins"]++;
+					}
+					
+					if($players[$row["Player2"]]["lastPlayerFaced"] != $row["Player1"]){
 						$players[$row["Player2"]]["scoredLoss"]++;
 					}
+					
 				break;
 				case 2:
 					//Player2 wins
@@ -177,9 +185,13 @@ class league extends Module {
 					$players[$row["Player1"]]["totLoss"]++;
 					
 					if($players[$row["Player2"]]["lastPlayerFaced"] != $row["Player1"]){
-						$players[$row["Player2"]]["scoredWins"]++;
+						$players[$row["Player2"]]["scoredWins"]++;	
+					}
+					
+					if($players[$row["Player1"]]["lastPlayerFaced"] != $row["Player2"]){
 						$players[$row["Player1"]]["scoredLoss"]++;
 					}
+					
 				break;
 				default:
 					//Should not get here!
@@ -191,11 +203,15 @@ class league extends Module {
 		
 		$retval = array();
 		foreach($players as $player){
-			$score = $player["scoredWins"] * 3 + $player["scoredDraws"] * 2 + $player["scoredLoss"];
+			$score = ($player["scoredWins"] * 3) + ($player["scoredDraws"] * 2) + $player["scoredLoss"];
 			
 			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
 							  "Wins" => $player["totWins"],
 							  "Draws" => $player["totDraws"],
+							  "Losses" => $player["totLoss"],
+							  "SWins" => $player["scoredWins"],
+							  "SDraw" => $player["scoredDraws"],
+							  "SLoss" => $player["scoredLoss"],
 							  "Score" => $score);
 		}
 		
@@ -266,7 +282,10 @@ class league extends Module {
 				case 0:
 					//draw
 					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
-						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 2);
+						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 2);	
+					}
+					
+					if($lastOpponents[$row["Player2"]] != $row["Player1"]){
 						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 2);
 					}
 				break;
@@ -274,13 +293,20 @@ class league extends Module {
 					//Player1 wins
 					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
 						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 3);
+					}
+					
+					if($lastOpponents[$row["Player2"]] != $row["Player1"]){
 						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 1);
 					}
 				break;
 				case 2:
 					//Player2 wins
-					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
+					if($lastOpponents[$row["Player2"]] != $row["Player1"]){
 						$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 3);
+						
+					}
+					
+					if($lastOpponents[$row["Player1"]] != $row["Player2"]){
 						$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 1);
 					}
 				break;
