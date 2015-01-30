@@ -15,9 +15,6 @@ class setup_page extends Installer {
 	}
 	
 	function Upgrade($oldversion){
-		$this->Uninstall();
-		$this->Install();
-		
 		return true;
 	}
 	

@@ -33,9 +33,6 @@ class setup_gallery extends Installer {
 	}
 	
 	function Upgrade($oldversion){
-		$this->Uninstall();
-		$this->Install();
-		
 		return true;
 	}
 	

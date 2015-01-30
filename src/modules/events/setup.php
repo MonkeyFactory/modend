@@ -20,9 +20,6 @@ class setup_events extends Installer {
 	}
 	
 	function Upgrade($oldversion){
-		$this->Uninstall();
-		$this->Install();
-		
 		return true;
 	}
 	

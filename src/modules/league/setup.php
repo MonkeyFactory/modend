@@ -26,9 +26,6 @@ class setup_league extends Installer {
 	}
 	
 	function Upgrade($oldversion){
-		//$this->Uninstall();
-		//$this->Install();
-		
 		return true;
 	}
 	
