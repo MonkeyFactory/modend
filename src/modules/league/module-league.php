@@ -40,11 +40,11 @@ class league extends Module {
 		
 		$this->validateInputForLeague($input);
 		
-		$sth = $this->db->prepare("insert into league values(null, ?, ?, ?, ?))");
+		$sth = $this->db->prepare("insert into leagues values(null, ?, ?, ?, ?)");
 		if($sth->execute(array($input->Name, $input->Description, $input->StartDate, $input->EndDate ? $input->EndDate : null)) == 0)
 			throw new Exception("Database update failed when creating league");
 			
-		return $this->getLeague($this->db->lastInsertId());
+		return $this->getLeague("", $this->db->lastInsertId());
 	}
 	
 	function updateLeague($input, $leagueId){
@@ -55,11 +55,11 @@ class league extends Module {
 		
 		$this->validateInputForLeague($input);
 		
-		$sth = $this->db->prepare("update league set Name = ?, Description = ?, StartDate = ?, EndDate = ? where leagueId = ? limit 1;");
+		$sth = $this->db->prepare("update leagues set Name = ?, Description = ?, StartDate = ?, EndDate = ? where leagueId = ? limit 1;");
 		if($sth->execute(array($input->Name, $input->Description, $input->StartDate, $input->EndDate, $leagueId)) == 0)
 			throw new Exception("Database update failed when updating league");
 
-		return $this->getLeague($leagueId);
+		return $this->getLeague("", $leagueId);
 	}
 	
 	function deleteLeague($input, $leagueId){
