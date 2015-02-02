@@ -8,7 +8,7 @@ header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Ac
 
 if($_SERVER["REQUEST_METHOD"] == "OPTIONS"){
 	http_response_code(200);
-	exit
+	exit;
 }
 
 if(!isset($_GET["m"])){
