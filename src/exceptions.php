@@ -25,7 +25,7 @@ class ExceptionHelper {
 	function LogException($db, $ex){
 		$rawInput = file_get_contents("php://input");
 		
-		$sth = $db->prepare("insert into exceptions (exceptionType, exceptionMessage, inputData) values(?,?,?)");
+		$sth = $db->prepare("insert into exceptions (exceptionType, exceptionMessage, inputData, exceptionDate) values(?,?,?, now()))");
 		$sth->execute(array(get_class($ex), $ex->getMessage(), $rawInput));
 	}
 

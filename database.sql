@@ -13,5 +13,6 @@ create table exceptions(
 	exceptionId int auto_increment primary key,
 	exceptionType varchar(20) not null,
 	exceptionMessage varchar(255) not null,
-	inputData blob
+	inputData blob,
+	exceptionDate datetime not null
 );
