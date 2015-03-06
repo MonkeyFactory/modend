@@ -22,6 +22,8 @@ $query = isset($_GET["q"]) ? $_GET["q"] : "";
 $core = new Core();
 $core->BuildRoutes();
 
+$exHelper = new ExceptionHelper();
+
 header("Content-type: application/json");
 
 try{
@@ -31,18 +33,18 @@ try{
 	echo $response;
 }
 catch(NoSuchEndpointException $ex){
-	LogException($core->db, $ex);
+	$exHelper->LogException($core->db, $ex);
 	$oldOutput = ob_get_clean();
 	
-	echo FormatOutputException($ex);
+	echo $exHelper->FormatOutputException($ex);
 	
 	http_response_code(501);
 }
 catch(InvalidInputDataException $ex2){
-	LogException($core->db, $ex2);
+	$exHelper->LogException($core->db, $ex2);
 	$oldOutput = ob_get_clean();
 
-	echo FormatOutputException($ex2);
+	echo $exHelper->FormatOutputException($ex2);
 	
 	http_response_code(400);
 }
@@ -51,10 +53,10 @@ catch(NoSuchResourceException $ex3) {
 }
 catch(Exception $ex4)
 {
-	LogException($core->db, $ex);
+	$exHelper->LogException($core->db, $ex);
 	$oldOutput = ob_get_clean();
 	
-	echo FormatOutputException($ex4, "Internal server error occurred");
+	echo $exHelper->FormatOutputException($ex4, "Internal server error occurred");
 		
 	http_response_code(500);
 }finally{
