@@ -29,7 +29,7 @@ class ExceptionHelper {
 		$sth->execute(array(get_class($ex), $ex->getMessage(), $rawInput));
 	}
 
-	function OutputFormatException($ex, $messageOverride = ""){
+	function FormatOutputException($ex, $messageOverride = ""){
 		return json_encode(array("type" => get_class($ex),
 								 "message" =>  (($messageOverride == "") ? $ex->getMessage() : $messageOverride)));
 	}
