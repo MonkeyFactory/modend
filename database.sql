@@ -8,3 +8,10 @@ create table modules(
 	moduleName varchar(50) not null,
 	installedVersion double not null
 );
+
+create table exceptions(
+	exceptionId int auto_increment primary key,
+	exceptionType varchar(20) not null,
+	exceptionMessage varchar(255) not null,
+	inputData blob
+);
