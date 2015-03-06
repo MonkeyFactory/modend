@@ -110,6 +110,10 @@ class league extends Module {
 		if(!isset($input->Winner) || $input->Winner == "" || $input->Winner > 2 || $input->Winner < 0)
 			throw new InvalidInputDataException("Argument Winner is required, must be int and between 0 and 2");
 			
+		if($input->Player1 == $input->Player2){
+			throw new NonInternalException("Don't you have any friends? You can't play against your self!");
+		}
+			
 		//Check if league is active!
 		$league = $this->getLeague(0, $leagueId);		
 		$choosenDate = new DateTime($input->MatchDate);
@@ -122,7 +126,7 @@ class league extends Module {
 		}
 			
 		if($choosenDate < $starts || ($ends != null && $choosenDate > $ends)){
-			throw new Exception("This league is not active, score report not possible");	
+			throw new NonInternalException("This league is not active, score report not possible");	
 		}
 			
 		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?);");

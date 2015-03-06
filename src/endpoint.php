@@ -53,10 +53,18 @@ catch(NoSuchResourceException $ex3) {
 }
 catch(Exception $ex4)
 {
-	$exHelper->LogException($core->db, $ex);
+	$exHelper->LogException($core->db, $ex4);
 	$oldOutput = ob_get_clean();
 	
 	echo $exHelper->FormatOutputException($ex4, "Internal server error occurred");
+		
+	http_response_code(500);
+{
+catch(NonInternalException $ex5){
+	$exHelper->LogException($core->db, $ex5);
+	$oldOutput = ob_get_clean();
+	
+	echo $exHelper->FormatOutputException($ex5);
 		
 	http_response_code(500);
 }finally{
