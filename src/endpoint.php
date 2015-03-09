@@ -50,6 +50,7 @@ catch(InvalidInputDataException $ex2){
 }
 catch(NoSuchResourceException $ex3) {
 	http_response_code(404);
+	$oldOutput = "";
 }
 catch(NonInternalException $ex5){
 	$exHelper->LogException($core->db, $ex5);
