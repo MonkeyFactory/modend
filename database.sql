@@ -12,7 +12,7 @@ create table modules(
 create table exceptions(
 	exceptionId int auto_increment primary key,
 	exceptionType varchar(20) not null,
-	exceptionMessage varchar(255) not null,
+	exceptionMessage text not null,
 	inputData blob,
 	exceptionDate datetime not null
 );
