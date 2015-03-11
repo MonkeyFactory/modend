@@ -5,7 +5,7 @@ include_once "exceptions.php";
 
 class league extends Module {
 	function SetMetadata(){
-		$this->version = 1.0;
+		$this->version = 1.1;
 		$this->author = "nojan";
 	}
 
@@ -114,6 +114,14 @@ class league extends Module {
 			throw new NonInternalException("Don't you have any friends? You can't play against your self!");
 		}
 			
+		$challengeExists = false;
+			
+		if(!isset($input->Player1PassedChallenge) || !$challengeExists)
+			$input->Player1PassedChallenge = false;
+			
+		if(!isset($input->Player2PassedChallenge) || !$challengeExists)
+			$input->Player2PassedChallenge = false;
+			
 		//Check if league is active!
 		$league = $this->getLeague(0, $leagueId);		
 		$choosenDate = new DateTime($input->MatchDate);
@@ -129,8 +137,8 @@ class league extends Module {
 			throw new NonInternalException("This league is not active, score report not possible");	
 		}
 			
-		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?);");
-		if(!$sth->execute(array($leagueId, $input->MatchDate, $input->Player1, $input->Player2, $input->Winner)))
+		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?, ?, ?);");
+		if(!$sth->execute(array($leagueId, $input->MatchDate, $input->Player1, $input->Player2, $input->Winner, $input->Player1PassedChallenge, $input->Player2PassedChallenge)))
 			throw new Exception("Error when inserting match into db");
 			
 		return true;
@@ -149,10 +157,16 @@ class league extends Module {
 		$sth->execute(array($leagueId));
 		foreach($sth->fetchAll(PDO::FETCH_ASSOC) as $row){
 			if(!array_key_exists($row["Player1"], $players))
-				$players[$row["Player1"]] = array("totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player1"]);
+				$players[$row["Player1"]] = array("completedChallenges" => 0, "totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player1"]);
 		
 			if(!array_key_exists($row["Player2"], $players))
-				$players[$row["Player2"]] = array("totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player2"]);
+				$players[$row["Player2"]] = array("completedChallenges" => 0, "totWins" => 0, "totDraws" => 0, "totLoss" => 0, "scoredWins" => 0, "scoredDraws" => 0, "scoredLoss" => 0, "lastPlayerFaced" => -1, "playerId" => $row["Player2"]);
+		
+			if($row["Player1PassedChallenge"])
+				$players[$row["Player1"]]["completedChallenges"]++;
+		
+			if($row["Player2PassedChallenge"])
+				$players[$row["Player2"]]["completedChallenges"]++;
 		
 			switch($row["Winner"]){
 				case 0:
@@ -207,7 +221,7 @@ class league extends Module {
 		
 		$retval = array();
 		foreach($players as $player){
-			$score = ($player["scoredWins"] * 3) + ($player["scoredDraws"] * 2) + $player["scoredLoss"];
+			$score = ($player["scoredWins"] * 3) + ($player["scoredDraws"] * 2) + $player["scoredLoss"] + $player["completedChallenges"];
 			
 			$retval[] = array("Name" => $authModule->lookupUserId("", $player["playerId"])["username"],
 							  "Wins" => $player["totWins"],
@@ -281,6 +295,13 @@ class league extends Module {
 				
 				$lastOpponents[$row["Player2"]] = -1;
 			}
+			
+			//Handle challenges
+			if($row["Player1PassedChallenge"])
+				$this->incrementScore($scoreHistory[$row["Player1"]], $currentLevel, 1);
+			
+			if($row["Player2PassedChallenge"])
+				$this->incrementScore($scoreHistory[$row["Player2"]], $currentLevel, 1);
 			
 			switch($row["Winner"]){
 				case 0:
