@@ -3,6 +3,31 @@
 include_once "base/module.php";
 include_once "exceptions.php";
 
+include_once "SimpleCRUD.php";
+
+class ChallengesCRUD extends SimpleCRUD {
+	function __construct($db, $auth){
+		SimpleCRUD::__construct($db, $auth, "leagues_challenges");
+	}
+
+	function RegisterRoutes($parent, $route, $endpointName = ""){
+		SimpleCRUD::RegisterRoutes($parent, $route, "challenge");
+		
+		$route->register($parent, "|^\/(\d*)\/currentchallenge$|", array($this, "getCurrentChallenge"));
+	}
+	
+	function getCurrentChallenge($input, $leagueId){
+		if(!isset($leagueId) || $leagueId == "")
+			throw new InvalidInputDataException("Argument leagueId is required");
+			
+		$sth = $this->db->prepare("select * from leagues_challenges where WeekNumber=WEEK(NOW(), 1) and leagueId=? limit 1;");
+		if($sth->execute(array($leagueId)) == 0)
+			throw new Exception("Failed to retrieve current challenge from database " . implode(",",  $sth->errorInfo()));
+			
+		return $sth->fetch(PDO::FETCH_ASSOC);
+	}
+}	
+
 class league extends Module {
 	function SetMetadata(){
 		$this->version = 1.1;
@@ -17,9 +42,13 @@ class league extends Module {
 		$route->register($this, "|^\/(\d*)\/leaderboard$|", array($this, "getLeaderboard"));
 		$route->register($this, "|^\/(\d*)\/scorehistory$|", array($this, "getScoreHistory"));
 		
+		$this->challenges = new ChallengesCRUD($this->db, $this->auth);
+		$this->challenges->RegisterRoutes($this, $route);
+		
 		$route->register($this, "|^\/(.*?)$|", array($this, "updateLeague"), "POST");
 		$route->register($this, "|^\/(.*?)$|", array($this, "deleteLeague"), "DELETE");
 		$route->register($this, "|^\/(.*?)$|", array($this, "getLeague"));
+	
 	}
 	
 	/* LEAGUE MANAGMENT */
@@ -87,7 +116,10 @@ class league extends Module {
 		if($sth->execute(array($leagueId)) == 0)
 			throw new Exception("Failed to retrieve league from database");
 			
-		return $sth->fetch(PDO::FETCH_ASSOC);
+		$retval = $sth->fetch(PDO::FETCH_ASSOC);
+		$retval["challenge"] = $this->challenges->getCurrentChallenge(null, $leagueId);
+		
+		return $retval;
 	}
 	
 	/* SCORE MANAGMENT */
