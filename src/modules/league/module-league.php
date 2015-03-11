@@ -166,7 +166,7 @@ class league extends Module {
 		}
 			
 		if($choosenDate < $starts || ($ends != null && $choosenDate > $ends)){
-			throw new NonInternalException("This league is not active, score report not possible");	
+			throw new NonInternalException("Selected date is not within the valid timeframe for the league");	
 		}
 			
 		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?, ?, ?);");
