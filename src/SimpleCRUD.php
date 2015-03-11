@@ -83,6 +83,9 @@ class SimpleCRUD {
 	}
 	
 	function RegisterRoutes($parent, $route, $endpointName = ""){
+		if($endpointName != "" && substr($endpointName,0, 1) != "/")
+			$endpointName = "/" . $endpointName;
+	
 		//Register all routes
 		$route->register($parent, "|^$endpointName\/$|", array($this, "OnCreate"), "POST");
 		$route->register($parent, "|^$endpointName\/$|", array($this, "OnList"));
