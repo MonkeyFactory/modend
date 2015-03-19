@@ -6,6 +6,10 @@ define("MODERATOR", 2);
 define("ADMIN", 3);
 
 function AuthLevelOr403($module, $requiredLevel){
+	if($requiredLevel == NOT_LOGGED_IN){
+		return;
+	}
+
 	$authlevel = $module->auth->GetAuthLevel();
 	if($authlevel == NOT_LOGGED_IN){
 		http_response_code(401);
