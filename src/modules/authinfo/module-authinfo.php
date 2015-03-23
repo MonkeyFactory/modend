@@ -21,7 +21,13 @@ class authinfo extends Module {
 	}
 	
 	function getInfo(){
-		return array("user" => $this->auth->GetUser(), "userId" => $this->auth->GetUserId(), "authlevel" => $this->auth->GetAuthLevel(), "groups" => $this->auth->GetGroups());
+		if(isset($_COOKIE["phpbb3_euf1c_sid"])){
+			$sid = $_COOKIE["phpbb3_euf1c_sid"];
+		}else{
+			$sid = 0;
+		}
+	
+		return array("user" => $this->auth->GetUser(), "userId" => $this->auth->GetUserId(), "authlevel" => $this->auth->GetAuthLevel(), "groups" => $this->auth->GetGroups(), "sid" => $sid);
 	}
 	
 	function PHPBBConnect(){
