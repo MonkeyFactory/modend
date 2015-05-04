@@ -28,6 +28,77 @@ class ChallengesCRUD extends SimpleCRUD {
 	}
 }	
 
+class MatchesCRUD extends SimpleCRUD {
+	function __construct($db, $auth){
+		SimpleCRUD::__construct($db, $auth, "leagues_matches");
+		
+		$this->SetAuthLevel("create", REGISTERED_USER);
+		$this->SetAuthLevel("retrieve", MODERATOR);
+		
+		$this->RegisterValidationFunction(array($this, "validateMatch)");
+	}
+	
+	function RegisterRoutes($parent, $route, $endpointName = ""){
+		SimpleCRUD::RegisterRoutes($parent, $route, "matches");	
+	}
+	
+	function validateMatch($input){
+		if(!isset($input->MatchDate) || preg_match("/\d[2-4]-\d[2]-\d[2] \d[2]:\d[2]/", $input->MatchDate) === false)
+			throw new InvalidInputDataException("Field MatchDate is required and has to be YYYY-MM-DD HH:MM");
+			
+		if(!isset($input->Player1) || $input->Player1 == "")
+			throw new InvalidInputDataException("Argument Player1 is required and must be int");
+			
+		if(!isset($input->Player2) || $input->Player2 == "")
+			throw new InvalidInputDataException("Argument Player2 is required and must be int");
+			
+		if(!isset($input->Winner) || $input->Winner == "" || $input->Winner > 2 || $input->Winner < 0)
+			throw new InvalidInputDataException("Argument Winner is required, must be int and between 0 and 2");
+			
+		if($input->Player1 == $input->Player2){
+			throw new NonInternalException("Don't you have any friends? You can't play against your self!");
+		}
+	}
+	
+	function OnCreate($input){
+		AuthLevelOr403($this, REGISTERED_USER);
+			
+		if(!isset($leagueId) || $leagueId == "")
+			throw new InvalidInputDataException("Argument leagueId is required");
+			
+		$this->ValidateInput($input);
+			
+		$challengeExists = false;
+			
+		if(!isset($input->Player1PassedChallenge) || !$challengeExists)
+			$input->Player1PassedChallenge = false;
+			
+		if(!isset($input->Player2PassedChallenge) || !$challengeExists)
+			$input->Player2PassedChallenge = false;
+			
+		//Check if league is active!
+		$league = $this->getLeague(0, $leagueId);		
+		$choosenDate = new DateTime($input->MatchDate);
+		$starts = new DateTime($league["StartDate"]);
+		if($league->EndDate != null){
+			$ends = new DateTime($league->EndDate);
+			$ends->modify("+1 day");
+		}else{
+			$ends = null;
+		}
+			
+		if($choosenDate < $starts || ($ends != null && $choosenDate > $ends)){
+			throw new NonInternalException("Selected date is not within the valid timeframe for the league");	
+		}
+			
+		$sth = $this->db->prepare("insert into leagues_matches values(null, ?, ?, ?, ?, ?, ?, ?);");
+		if(!$sth->execute(array($leagueId, $input->MatchDate, $input->Player1, $input->Player2, $input->Winner, $input->Player1PassedChallenge, $input->Player2PassedChallenge)))
+			throw new Exception("Error when inserting match into db");
+			
+		return true;
+	}
+}
+
 class league extends Module {
 	function SetMetadata(){
 		$this->version = 1.1;
@@ -38,12 +109,15 @@ class league extends Module {
 		$route->register($this, "|^\/$|", array($this, "addLeague"), "POST");
 		$route->register($this, "|^\/$|", array($this, "listLeagues"));
 		
-		$route->register($this, "|^\/(\d*)\/reportmatch$|", array($this, "reportMatch"), "POST");
+		//$route->register($this, "|^\/(\d*)\/reportmatch$|", array($this, "reportMatch"), "POST");
 		$route->register($this, "|^\/(\d*)\/leaderboard$|", array($this, "getLeaderboard"));
 		$route->register($this, "|^\/(\d*)\/scorehistory$|", array($this, "getScoreHistory"));
 		
 		$this->challenges = new ChallengesCRUD($this->db, $this->auth);
 		$this->challenges->RegisterRoutes($this, $route);
+		
+		$this->matches = new MatchesCRUD($this->db, $this->auth);
+		$this->matches->RegisterRoutes($this, $route);
 		
 		$route->register($this, "|^\/(.*?)$|", array($this, "updateLeague"), "POST");
 		$route->register($this, "|^\/(.*?)$|", array($this, "deleteLeague"), "DELETE");
@@ -124,7 +198,7 @@ class league extends Module {
 	
 	/* SCORE MANAGMENT */
 	
-	function reportMatch($input, $leagueId){
+	/* function reportMatch($input, $leagueId){
 		AuthLevelOr403($this, REGISTERED_USER);
 			
 		if(!isset($leagueId) || $leagueId == "")
@@ -174,7 +248,7 @@ class league extends Module {
 			throw new Exception("Error when inserting match into db");
 			
 		return true;
-	}
+	} */
 	
 	function getLeaderboard($input, $leagueId){
 		if(!isset($leagueId) || $leagueId == "")
