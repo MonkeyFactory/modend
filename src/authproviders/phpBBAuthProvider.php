@@ -6,9 +6,17 @@ include_once "authmanager.php";
 define('IN_PHPBB', true);
 define('PHPBB_ROOT_PATH', '../../phpBB3/');
 
+//Requires core.disable_super_globals: false to be set in parameters.yml
+
 class phpBBAuthProvider extends AuthProvider {
 	function __construct(){
-		global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
+		global $request;
+		global $phpbb_container;
+		global $phpbb_root_path, $phpEx, $user, $auth, $cache, $db, $config, $template, $table_prefix;
+		global $request;
+		global $phpbb_dispatcher;
+		global $symfony_request;
+		global $phpbb_filesystem;
 	
 		$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : './';
 		$phpEx = substr(strrchr(__FILE__, '.'), 1);
