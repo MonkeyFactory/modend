@@ -15,6 +15,8 @@ class phpBBAuthProvider extends AuthProvider {
 		include($phpbb_root_path . 'common.' . $phpEx);
 		include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 		
+		$request->enable_super_globals();
+		
 		// Start session management
 		$user->session_begin();
 		$auth->acl($user->data);
